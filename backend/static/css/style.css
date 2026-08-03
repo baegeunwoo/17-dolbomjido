@@ -1,0 +1,86 @@
+/* ============================================================
+   Tailwind가 담당하지 못하는 두 영역만 남깁니다.
+   ① Leaflet 내부 요소  ② map.js가 문자열로 만드는 마크업
+   ============================================================ */
+
+/* ── 지표 전환 버튼 ─────────────────────────────────── */
+.metric-btn {
+  padding: 5px 13px;
+  border: 1px solid #e5e5e1;
+  border-radius: 6px;
+  background: #fff;
+  font-size: 13px;
+  font-family: inherit;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all .12s;
+}
+.metric-btn:hover { background: #f7f7f5; color: #14161a; }
+.metric-btn.on { background: #14161a; border-color: #14161a; color: #fff; }
+
+/* ── Leaflet ────────────────────────────────────────── */
+.leaflet-container { font-family: inherit; background: #fff; }
+
+.leaflet-tooltip {
+  border: 0; border-radius: 6px; padding: 6px 9px;
+  background: rgba(20,22,26,.92); color: #fff;
+  font-size: 12px; line-height: 1.5; box-shadow: none;
+}
+.leaflet-tooltip::before { display: none; }
+
+.legend {
+  background: #fff;
+  border: 1px solid #e5e5e1;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 12px;
+  line-height: 19px;
+  box-shadow: 0 2px 10px rgba(0,0,0,.06);
+}
+.legend strong { font-weight: 600; }
+.legend .sub { display: block; color: #6b7280; font-size: 11px; margin-bottom: 6px; }
+.legend i {
+  width: 15px; height: 11px; display: inline-block;
+  margin-right: 7px; vertical-align: -1px; border-radius: 2px;
+}
+
+/* ── map.js가 그리는 상세 패널 ──────────────────────── */
+#panel h2 { font-size: 19px; font-weight: 600; letter-spacing: -.3px; margin: 0 0 8px; }
+#panel h3 {
+  font-size: 12px; color: #6b7280; font-weight: 500;
+  border-bottom: 1px solid #e5e5e1; padding-bottom: 5px; margin: 20px 0 4px;
+}
+#panel .badge {
+  display: inline-block; color: #fff; font-size: 11px;
+  padding: 3px 9px; border-radius: 4px;
+}
+#panel .type-desc { font-size: 13px; color: #6b7280; margin: 9px 0 0; }
+
+#panel table.kv { width: 100%; border-collapse: collapse; font-size: 13px; }
+#panel table.kv th {
+  text-align: left; font-weight: 400; color: #6b7280;
+  padding: 5px 0; border-bottom: 1px solid #f0f0ee;
+}
+#panel table.kv th.sub { padding-left: 12px; color: #9ca3af; font-size: 12px; }
+#panel table.kv td {
+  text-align: right; padding: 5px 0; border-bottom: 1px solid #f0f0ee;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+#panel .diff { font-size: 11px; margin-left: 5px; }
+#panel .diff.up { color: #1baf7a; }
+#panel .diff.down { color: #e34948; }
+
+#panel .bar { height: 6px; background: #f0f0ee; border-radius: 3px; margin-top: 9px; }
+#panel .bar span { display: block; height: 100%; background: #14161a; border-radius: 3px; }
+
+#panel .note { font-size: 11px; color: #9ca3af; margin-top: 10px; }
+#panel .warn {
+  font-size: 11px; color: #a3372f; background: #fdf3f2;
+  padding: 7px 9px; border-radius: 5px; margin-top: 12px;
+}
+#panel .more {
+  display: inline-block; margin-top: 18px; font-size: 13px;
+  color: #2f5d7c; text-decoration: none;
+}
+#panel .more:hover { text-decoration: underline; }

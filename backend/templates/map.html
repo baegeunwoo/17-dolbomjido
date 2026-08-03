@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block bodyclass %}h-screen overflow-hidden{% endblock %}
+{% block title %}돌봄지도 | 대구 영유아 돌봄지도{% endblock %}
+{% block footer %}{% endblock %}
+
+{% block content %}
+<div class="h-full flex">
+
+  <div class="flex-1 min-w-0 flex flex-col">
+    <div id="metric-btns" class="flex gap-1.5 border-b border-line px-5 py-2.5">
+      <button data-metric="type" class="metric-btn">유형</button>
+      <button data-metric="rcov" class="metric-btn">반경 커버율</button>
+      <button data-metric="cov"  class="metric-btn">커버율</button>
+      <button data-metric="use"  class="metric-btn">이용률</button>
+      <button data-metric="fill" class="metric-btn">충원율</button>
+    </div>
+    <div id="map" class="flex-1"></div>
+  </div>
+
+  <aside id="panel" class="w-[340px] shrink-0 border-l border-line overflow-y-auto p-5">
+    <p class="text-[14px] text-mute">지도에서 행정동을 클릭하면 자세한 내용이 여기 표시됩니다.</p>
+  </aside>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/map.js"></script>
+{% endblock %}

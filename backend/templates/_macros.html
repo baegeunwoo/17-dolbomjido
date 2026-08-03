@@ -1,0 +1,78 @@
+{#- ============================================================
+    공용 매크로 — {% from "_macros.html" import badge, stat, temp %}
+    Tailwind는 클래스명을 문자열 그대로 찾으므로
+    'bg-' ~ 조합이 아니라 아래 매핑을 통해서만 색을 지정합니다.
+   ============================================================ -#}
+
+{% set TYPE_BG = {
+  '물리적부족': 'bg-lack', '이중취약': 'bg-dual', '질적미스매치': 'bg-over',
+  '양호': 'bg-good', '광역거점': 'bg-hub', '완전공백': 'bg-none', '산출불가': 'bg-na'
+} %}
+{% set TYPE_DOT = {
+  '물리적부족': 'bg-lack', '이중취약': 'bg-dual', '질적미스매치': 'bg-over',
+  '양호': 'bg-good', '광역거점': 'bg-hub', '완전공백': 'bg-none', '산출불가': 'bg-na'
+} %}
+{% set TYPE_LABEL = {
+  '질적미스매치': '공급과잉·수요이탈'
+} %}
+
+
+{#- 유형 배지 -#}
+{% macro badge(t, size='sm') -%}
+<span class="inline-flex items-center rounded text-white whitespace-nowrap
+             {{ TYPE_BG.get(t, 'bg-mute') }}
+             {% if size == 'lg' %}px-3 py-1 text-[13px]{% else %}px-2 py-0.5 text-[11px]{% endif %}">
+  {{ TYPE_LABEL.get(t, t) }}
+</span>
+{%- endmacro %}
+
+
+{#- 색 점만 (테이블 등 좁은 자리) -#}
+{% macro dot(t) -%}
+<span class="inline-block w-2 h-2 rounded-full align-middle {{ TYPE_DOT.get(t, 'bg-mute') }}"></span>
+{%- endmacro %}
+
+
+{#- 큰 숫자 카드 -#}
+{% macro stat(label, value, sub='', accent='') -%}
+<div class="rounded-lg border border-line p-4">
+  <div class="text-[11px] text-mute">{{ label }}</div>
+  <div class="font-num text-[26px] leading-tight tracking-tighter mt-0.5 {{ accent }}">{{ value }}</div>
+  {% if sub %}<div class="text-[11px] text-mute mt-0.5">{{ sub }}</div>{% endif %}
+</div>
+{%- endmacro %}
+
+
+{#- 대구 평균 대비 증감 -#}
+{% macro delta(value, base, unit='%p') -%}
+  {% if value is not none %}
+    {% set g = value - base %}
+    <span class="font-num text-[11px] ml-1 {% if g >= 0 %}text-good{% else %}text-lack{% endif %}">
+      {{ '+' if g >= 0 }}{{ '%.1f'|format(g) }}{{ unit }}
+    </span>
+  {% endif %}
+{%- endmacro %}
+
+
+{#- 온도 막대 — 이 사이트의 시그니처.
+    0~100% 스케일 위에 이 동의 값과 대구 평균을 함께 얹습니다. -#}
+{% macro temp(value, avg, label) -%}
+<div>
+  <div class="flex items-baseline justify-between mb-1.5">
+    <span class="text-[12px] text-mute">{{ label }}</span>
+    <span class="font-num text-[15px]">{% if value is not none %}{{ '%.1f'|format(value) }}%{% else %}—{% endif %}</span>
+  </div>
+  <div class="relative h-2 rounded-full bg-gradient-to-r from-sky-200 via-amber-200 to-lack/70">
+    {% if value is not none %}
+    <span class="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-3.5 h-3.5 rounded-full bg-white ring-2 ring-ink"
+          style="left: {{ [[value, 100]|min, 0]|max }}%"></span>
+    {% endif %}
+    <span class="absolute -top-1 -bottom-1 w-px bg-ink/35" style="left: {{ avg }}%"></span>
+  </div>
+  <div class="flex justify-between text-[10px] text-mute mt-1">
+    <span>0%</span>
+    <span>대구 평균 {{ avg }}%</span>
+    <span>100%</span>
+  </div>
+</div>
+{%- endmacro %}

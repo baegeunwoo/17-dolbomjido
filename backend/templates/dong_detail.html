@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+{% from "_macros.html" import badge, stat, delta, temp with context %}
+{% block title %}{{ d.gu }} {{ d.dong }} | 대구 영유아 돌봄지도{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-[1000px] px-6 py-8">
+
+  <a href="/dong" class="text-[12px] text-mute hover:text-ink hover:underline">← 동네 찾기</a>
+
+  <div class="flex flex-wrap items-center gap-3 mt-3 mb-1">
+    <h1 class="text-[26px] font-semibold tracking-tight">{{ d.gu }} {{ d.dong }}</h1>
+    {{ badge(d.ftype, 'lg') }}
+  </div>
+  <p class="text-[14px] text-mute">{{ type_txt }}</p>
+
+  {% if d.ftype == '광역거점' %}
+  <p class="mt-3 rounded-md border-l-2 border-hub bg-hub/5 px-3 py-2 text-[13px]">
+    거주 영유아({{ "%.1f"|format(d.kidratio) }}%)에 비해 시설이 많아, 인근 동 아이들의 통원처 역할을 합니다.
+  </p>
+  {% endif %}
+
+  {% if d.pop06 < 100 %}
+  <p class="mt-3 rounded-md border-l-2 border-lack bg-lack/5 px-3 py-2 text-[13px]">
+    0~6세가 100명 미만이라 비율 지표가 크게 흔들릴 수 있습니다. 절대 수치와 함께 보세요.
+  </p>
+  {% endif %}
+
+  <!-- 시그니처: 온도 막대 -->
+  <section class="mt-7 rounded-lg border border-line p-5">
+    <h2 class="text-[13px] font-medium mb-4">이 동네의 온도</h2>
+    <div class="grid grid-cols-2 gap-8">
+      {{ temp(d.fill, city.fill, '충원율 — 정원이 얼마나 찼는가') }}
+      {{ temp(d.use, city.use, '이용률 — 아이 대비 얼마나 다니는가') }}
+    </div>
+  </section>
+
+  <section class="mt-4 grid grid-cols-3 gap-3">
+    {{ stat('커버율', "%.1f"|format(d.cov) ~ '%', '정원 ÷ 0~6세 인구') }}
+    {{ stat('반경 커버율',
+            ("%.1f"|format(d.rcov) ~ '%') if d.rcov is not none else '산출 불가',
+            '인근 1km 시설 포함') }}
+    {{ stat('반경 1km 시설', "{:,}".format(d.fac1k) ~ '개소', '관내 ' ~ d.fac ~ '개소') }}
+  </section>
+
+  {% if d.rtrust == '낮음' %}
+  <p class="mt-2 text-[12px] text-lack">
+    반경 1.5km 안 시설이 {{ d.fac15k }}개뿐이라 경계 보정값을 낼 수 없습니다. 원본 커버율을 보세요.
+  </p>
+  {% elif d.rwarn == 'Y' %}
+  <p class="mt-2 text-[12px] text-mute">
+    면적이 넓은 지역({{ "%.1f"|format(d.area) }}㎢)이라 반경 보정값이 실제보다 낮게 나올 수 있습니다.
+  </p>
+  {% else %}
+  <p class="mt-2 text-[12px] text-mute">
+    반경 커버율은 행정동 경계를 넘는 통원을 반영한 값입니다(거리감쇠 2SFCA, 1km).
+  </p>
+  {% endif %}
+
+  <div class="mt-8 grid grid-cols-2 gap-8">
+    <section>
+      <h2 class="text-[13px] font-medium border-b border-line pb-2 mb-1">수요와 공급</h2>
+      <dl class="text-[14px] font-num">
+        {% macro kv(k, v, indent=false) %}
+        <div class="flex justify-between border-b border-line/60 py-1.5">
+          <dt class="font-sans {% if indent %}pl-3 text-mute text-[13px]{% else %}text-mute{% endif %}">{{ k }}</dt>
+          <dd>{{ v }}</dd>
+        </div>
+        {% endmacro %}
+        {{ kv('0~6세 인구', "{:,}".format(d.pop06) ~ '명') }}
+        {{ kv('0~2세 영아', "{:,}".format(d.pop02) ~ '명', true) }}
+        {{ kv('3~6세 유아', "{:,}".format(d.pop36) ~ '명', true) }}
+        {{ kv('전체 인구', "{:,}".format(d.total_pop) ~ '명') }}
+        {{ kv('어린이집 · 유치원', d.fac_dc ~ ' · ' ~ d.fac_kg ~ '개소') }}
+        {{ kv('정원', "{:,}".format(d.cap) ~ '석') }}
+        {{ kv('현원', "{:,}".format(d.enr) ~ '명') }}
+        {{ kv('빈자리', "{:,}".format(d.cap - d.enr) ~ '석') }}
+      </dl>
+    </section>
+
+    <section>
+      <h2 class="text-[13px] font-medium border-b border-line pb-2 mb-1">주거 환경</h2>
+      {% if d.price is not none %}
+      <dl class="text-[14px] font-num">
+        <div class="flex justify-between border-b border-line/60 py-1.5">
+          <dt class="font-sans text-mute">아파트 평당가</dt>
+          <dd>{{ "{:,}".format(d.price|round|int) }}만원{{ delta(d.price, city.price, '만원') }}</dd>
+        </div>
+        <div class="flex justify-between border-b border-line/60 py-1.5">
+          <dt class="font-sans text-mute">아파트 연식</dt>
+          <dd>{{ d.age|round|int }}년</dd>
+        </div>
+        <div class="flex justify-between border-b border-line/60 py-1.5">
+          <dt class="font-sans text-mute">면적</dt>
+          <dd>{{ "%.2f"|format(d.area) }}㎢</dd>
+        </div>
+      </dl>
+      <p class="text-[12px] text-mute mt-2">최근 1년(2025.07~2026.06) 실거래 중위값입니다.</p>
+      {% else %}
+      <p class="text-[13px] text-mute py-2">최근 1년 아파트 실거래가 없어 집값 정보를 제공하지 않습니다.</p>
+      {% endif %}
+
+      <div class="flex gap-2 mt-6">
+        <a href="/map?focus={{ d.adm_cd }}"
+           class="rounded-md bg-ink px-4 py-2 text-[14px] text-white hover:bg-ink/85">지도에서 보기</a>
+        <a href="/dong?gu={{ d.gu }}"
+           class="rounded-md border border-line px-4 py-2 text-[14px] hover:bg-surf">{{ d.gu }} 전체</a>
+      </div>
+    </section>
+  </div>
+
+  <section class="mt-10">
+    <h2 class="text-[13px] font-medium border-b border-line pb-2 mb-3">{{ d.gu }}의 다른 동</h2>
+    <p class="flex flex-wrap gap-x-3 gap-y-1.5 text-[13px]">
+      {% for s in siblings %}
+      <a href="/dong/{{ s.adm_cd }}" class="text-link hover:underline">{{ s.dong }}</a>
+      {% endfor %}
+    </p>
+  </section>
+
+</div>
+{% endblock %}

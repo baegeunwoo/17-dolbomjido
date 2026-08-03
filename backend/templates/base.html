@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}대구 영유아 돌봄지도{% endblock %}</title>
+
+  <!-- 본문용 한글 UI 서체 -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            /* 유형 7색 — 데이터 전용 */
+            lack: '#e34948', dual: '#eb6834', over: '#eda100',
+            good: '#1baf7a', hub:  '#6b5bd6', none: '#8a8a8a', na: '#c9c7bf',
+            /* UI 크롬 — 무채색으로 고정 */
+            ink:  '#14161a', mute: '#6b7280',
+            line: '#e5e5e1', surf: '#f7f7f5',
+            link: '#2f5d7c',
+          },
+          fontFamily: {
+            sans: ['Pretendard Variable', 'Pretendard', 'system-ui', 'sans-serif'],
+            num:  ['ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
+          },
+        },
+      },
+    };
+  </script>
+
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+
+<body class="{% block bodyclass %}min-h-screen{% endblock %} flex flex-col bg-white text-ink font-sans antialiased">
+
+  <header class="border-b border-line bg-white/95 backdrop-blur sticky top-0 z-[500]">
+    <div class="mx-auto max-w-[1400px] px-6 py-3 flex items-baseline gap-6">
+      <a href="/" class="shrink-0">
+        <span class="block text-[17px] font-semibold tracking-tight">대구 영유아 돌봄지도</span>
+        <span class="block text-[11px] text-mute mt-0.5">동네마다 다른 온도와 정책 우선지역</span>
+      </a>
+
+      <nav class="ml-auto flex gap-1 text-[13px]">
+        {% set nav = [('/map', '지도'), ('/quadrant', '유형 분석'), ('/dong', '동네 찾기')] %}
+        {% for href, label in nav %}
+        <a href="{{ href }}"
+           class="px-3 py-1.5 rounded-md transition-colors
+                  {% if request.url.path == href %}bg-ink text-white{% else %}text-mute hover:text-ink hover:bg-surf{% endif %}">
+          {{ label }}
+        </a>
+        {% endfor %}
+      </nav>
+    </div>
+  </header>
+
+  <main class="flex-1 min-h-0">
+    {% block content %}{% endblock %}
+  </main>
+
+  {% block footer %}
+  <footer class="border-t border-line bg-surf">
+    <div class="mx-auto max-w-[1400px] px-6 py-5 text-[11px] leading-relaxed text-mute">
+      영유아 인구는 2026년 6월 주민등록 만 0~6세 기준, 시설은 운영 중인 어린이집·유치원 기준입니다.
+      아파트 가격은 2025년 7월~2026년 6월 실거래가입니다.
+      <br>
+      출처 — 행정안전부 · 어린이집정보공개포털 · 유치원알리미 · 국토교통부 실거래가 · 통계청 SGIS
+    </div>
+  </footer>
+  {% endblock %}
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

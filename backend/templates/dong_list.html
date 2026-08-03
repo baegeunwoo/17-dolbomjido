@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% from "_macros.html" import badge, dot with context %}
+{% block title %}동네 찾기 | 대구 영유아 돌봄지도{% endblock %}
+
+{#- 정렬 링크: 같은 컬럼을 다시 누르면 방향이 뒤집힙니다 -#}
+{% macro th(key, label, align='right') %}
+  {% set cur = (sort == key) %}
+  <th class="px-3 py-2.5 font-normal border-b border-line whitespace-nowrap
+             {% if align == 'left' %}text-left{% else %}text-right{% endif %}">
+    <a href="?q={{ q }}&gu={{ gu }}&type={{ type }}&sort={{ key }}&desc={{ 'false' if (cur and desc) else 'true' }}"
+       class="inline-flex items-center gap-1 hover:text-ink {% if cur %}text-ink font-medium{% else %}text-mute{% endif %}">
+      {{ label }}
+      {% if cur %}<span class="text-[9px]">{{ '▼' if desc else '▲' }}</span>{% endif %}
+    </a>
+  </th>
+{% endmacro %}
+
+{% block content %}
+<div class="mx-auto max-w-[1400px] px-6 py-8">
+
+  <div class="flex items-end justify-between gap-6 mb-5">
+    <div>
+      <h1 class="text-[22px] font-semibold tracking-tight">동네 찾기</h1>
+      <p class="text-[13px] text-mute mt-1">
+        대구 {{ total }}개 행정동의 영유아 돌봄 지표입니다. 표 머리글을 눌러 정렬할 수 있습니다.
+      </p>
+    </div>
+    <p class="text-[12px] text-mute shrink-0 pb-1">
+      <span class="font-num text-ink text-[15px]">{{ rows|length }}</span>개 동
+    </p>
+  </div>
+
+  <form method="get" action="/dong"
+        class="flex flex-wrap items-center gap-2 rounded-lg border border-line bg-surf p-3 mb-4">
+    <input type="text" name="q" value="{{ q }}" placeholder="동 이름 검색 (예: 성내3동)"
+           class="flex-1 min-w-[220px] rounded-md border border-line bg-white px-3 py-2 text-[14px]
+                  focus:outline-none focus:ring-2 focus:ring-ink/15 focus:border-ink/30">
+
+    <select name="gu" class="rounded-md border border-line bg-white px-3 py-2 text-[14px]">
+      <option value="">전체 구·군</option>
+      {% for g in gu_list %}<option value="{{ g }}" {{ 'selected' if g == gu }}>{{ g }}</option>{% endfor %}
+    </select>
+
+    <select name="type" class="rounded-md border border-line bg-white px-3 py-2 text-[14px]">
+      <option value="">전체 유형</option>
+      {% for t in type_list %}<option value="{{ t }}" {{ 'selected' if t == type }}>{{ t }}</option>{% endfor %}
+    </select>
+
+    <input type="hidden" name="sort" value="{{ sort }}">
+    <input type="hidden" name="desc" value="{{ 'true' if desc else 'false' }}">
+
+    <button type="submit" class="rounded-md bg-ink px-4 py-2 text-[14px] text-white hover:bg-ink/85">검색</button>
+    <a href="/dong" class="px-2 text-[13px] text-mute hover:text-ink hover:underline">초기화</a>
+  </form>
+
+  <p class="text-[11px] text-mute mb-2">
+    반경 커버율은 인근 1km 안의 시설까지 포함한 값입니다. 옆의 흐린 숫자는 해당 동만 계산한 원본 커버율입니다.
+  </p>
+
+  <div class="overflow-x-auto rounded-lg border border-line">
+    <table class="w-full text-[13px]">
+      <thead class="bg-surf">
+        <tr>
+          {{ th('dong', '행정동', 'left') }}
+          {{ th('gu', '구·군', 'left') }}
+          {{ th('pop06', '0~6세') }}
+          {{ th('cap', '정원') }}
+          {{ th('enr', '현원') }}
+          {{ th('rcov', '반경 커버율') }}
+          {{ th('fill', '충원율') }}
+          {{ th('price', '평당가') }}
+          <th class="px-3 py-2.5 text-left font-normal text-mute border-b border-line">유형</th>
+        </tr>
+      </thead>
+      <tbody class="font-num">
+        {% for d in rows %}
+        <tr onclick="location.href='/dong/{{ d.adm_cd }}'"
+            class="cursor-pointer border-b border-line/70 last:border-0 hover:bg-sky-50/60">
+          <td class="px-3 py-2 text-left font-sans font-medium">{{ d.dong }}</td>
+          <td class="px-3 py-2 text-left font-sans text-mute">{{ d.gu }}</td>
+          <td class="px-3 py-2 text-right">{{ "{:,}".format(d.pop06) }}</td>
+          <td class="px-3 py-2 text-right">{{ "{:,}".format(d.cap) }}</td>
+          <td class="px-3 py-2 text-right">{{ "{:,}".format(d.enr) }}</td>
+          <td class="px-3 py-2 text-right whitespace-nowrap">
+            {% if d.rcov is not none %}
+              {{ "%.1f"|format(d.rcov) }}%<span class="text-mute/60 text-[11px] ml-1.5">{{ "%.0f"|format(d.cov) }}</span>
+            {% else %}
+              <span class="text-mute">{{ "%.1f"|format(d.cov) }}%</span>
+            {% endif %}
+          </td>
+          <td class="px-3 py-2 text-right">{% if d.fill is not none %}{{ "%.1f"|format(d.fill) }}%{% else %}—{% endif %}</td>
+          <td class="px-3 py-2 text-right">{% if d.price is not none %}{{ "{:,}".format(d.price|round|int) }}{% else %}—{% endif %}</td>
+          <td class="px-3 py-2 text-left font-sans">{{ badge(d.ftype) }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="9" class="px-3 py-14 text-center text-mute font-sans">
+          조건에 맞는 동이 없습니다. 검색어나 필터를 바꿔보세요.
+        </td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+</div>
+{% endblock %}
