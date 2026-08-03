@@ -4,7 +4,7 @@ from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
-import backend.data as data
+import data
 
 BASE = Path(__file__).resolve().parent
 app = FastAPI(title="대구 영유아 돌봄지도")
